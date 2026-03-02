@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OperationLogController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
@@ -33,6 +34,9 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/me', [AuthController::class, 'me']);
     });
+
+    // 仪表盘
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
     // 用户管理
     Route::prefix('users')->group(function () {

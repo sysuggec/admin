@@ -93,6 +93,7 @@
 import { ref, onMounted } from 'vue'
 import { User, UserFilled, Lock, Document } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import { getDashboardStats } from '@/api/dashboard'
 
 const userStore = useUserStore()
 
@@ -105,14 +106,17 @@ const stats = ref({
 
 const lastLoginTime = ref('-')
 
-onMounted(() => {
-  // 这里可以调用 API 获取统计数据
-  stats.value = {
-    userCount: 1,
-    roleCount: 3,
-    permissionCount: 21,
-    logCount: 1,
+async function fetchStats() {
+  try {
+    const { data } = await getDashboardStats()
+    stats.value = data.data
+  } catch {
+    // 错误已在拦截器中处理
   }
+}
+
+onMounted(() => {
+  fetchStats()
 })
 </script>
 
