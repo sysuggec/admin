@@ -1,5 +1,6 @@
 #!/bin/bash
 # 数据库初始化脚本
+# 用于重置数据库（会清空所有数据）
 
 set -e
 
@@ -10,8 +11,15 @@ cd "$(dirname "$0")/.."
 
 # 检查环境配置
 if [ ! -f .env ]; then
-    echo "错误: .env 文件不存在"
-    exit 1
+    echo ">>> .env 文件不存在，从 .env.example 复制..."
+    cp .env.example .env
+    
+    # 生成必要的密钥
+    echo ">>> 生成 APP_KEY..."
+    php artisan key:generate
+    
+    echo ">>> 生成 JWT_SECRET..."
+    php artisan jwt:secret --force
 fi
 
 # 确认执行

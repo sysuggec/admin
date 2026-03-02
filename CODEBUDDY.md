@@ -25,6 +25,15 @@ This is an admin management system with a Laravel 11 backend API and Vue 3 front
 # Install dependencies
 composer install
 
+# Initialize project (first time setup)
+./scripts/init-project.sh
+
+# Or manually:
+cp .env.example .env
+php artisan key:generate
+php artisan jwt:secret
+php artisan migrate --seed
+
 # Run development server
 php artisan serve
 
@@ -56,6 +65,9 @@ php artisan config:clear
 ```bash
 # Install dependencies
 npm install
+
+# Copy environment config
+cp .env.example .env
 
 # Run development server (port 3000, proxies /api to backend at :8000)
 npm run dev
