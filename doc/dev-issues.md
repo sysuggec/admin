@@ -242,6 +242,53 @@ onMounted(() => {
 
 ---
 
+## 问题6: Token 过期时多次弹出登录过期提示
+
+### 现象
+当 JWT Token 过期后，页面会连续弹出多个"登录已过期，请重新登录"的提示消息。
+
+### 原因分析
+页面加载时会同时发起多个 API 请求（如获取用户信息、菜单、统计数据等）。当 Token 过期时，这些并发请求都会返回 401 错误，响应拦截器对每个 401 错误都进行了处理，导致多次弹出提示消息。
+
+原代码：
+```typescript
+case 401:
+  // Token 过期或未登录
+  const userStore = useUserStore()
+  userStore.logout()
+  router.push('/login')
+  ElMessage.error('登录已过期，请重新登录')  // 每个请求都会触发
+  break
+```
+
+### 解决方案
+添加 `isHandling401` 标志位，确保只处理第一次 401 错误，后续的 401 错误会被忽略：
+
+```typescript
+// 是否正在处理 401 错误（防止多次弹出提示）
+let isHandling401 = false
+
+// 响应拦截器中
+case 401:
+  // Token 过期或未登录（只处理一次）
+  if (!isHandling401) {
+    isHandling401 = true
+    const userStore = useUserStore()
+    userStore.logout()
+    ElMessage.error('登录已过期，请重新登录')
+    router.push('/login')
+    // 延迟重置标志，防止短时间内重复处理
+    setTimeout(() => {
+      isHandling401 = false
+    }, 1000)
+  }
+  break
+```
+
+修改文件：`frontend/src/api/request.ts`
+
+---
+
 ## 快速启动命令
 
 ```bash
