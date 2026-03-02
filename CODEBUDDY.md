@@ -81,6 +81,7 @@ app/
 ├── Http/
 │   ├── Controllers/        # API Controllers
 │   │   ├── Auth/           # AuthController (login, logout, refresh, me)
+│   │   ├── DashboardController  # Dashboard statistics
 │   │   ├── UserController
 │   │   ├── RoleController
 │   │   ├── PermissionController
@@ -107,6 +108,7 @@ frontend/src/
 ├── api/                    # Axios API modules
 │   ├── request.ts          # Axios instance with interceptors
 │   ├── auth.ts
+│   ├── dashboard.ts        # Dashboard statistics API
 │   ├── user.ts
 │   ├── role.ts
 │   ├── permission.ts

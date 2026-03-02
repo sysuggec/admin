@@ -516,6 +516,12 @@ echo "=== 初始化完成 ==="
 | DELETE | /api/operation-logs/batch | 批量删除操作日志 | log:delete |
 | GET | /api/operation-logs/export | 导出操作日志 | log:export |
 
+### 5.6 仪表盘模块
+
+| 方法 | 路径 | 说明 | 权限标识 |
+|------|------|------|----------|
+| GET | /api/dashboard/stats | 获取统计数据 | 需登录 |
+
 ---
 
 ## 六、后端核心实现
