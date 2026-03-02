@@ -13,6 +13,9 @@ const request: AxiosInstance = axios.create({
   },
 })
 
+// 是否正在处理 401 错误（防止多次弹出提示）
+let isHandling401 = false
+
 // 请求拦截器
 request.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -50,11 +53,18 @@ request.interceptors.response.use(
     if (response) {
       switch (response.status) {
         case 401:
-          // Token 过期或未登录
-          const userStore = useUserStore()
-          userStore.logout()
-          router.push('/login')
-          ElMessage.error('登录已过期，请重新登录')
+          // Token 过期或未登录（只处理一次）
+          if (!isHandling401) {
+            isHandling401 = true
+            const userStore = useUserStore()
+            userStore.logout()
+            ElMessage.error('登录已过期，请重新登录')
+            router.push('/login')
+            // 延迟重置标志，防止短时间内重复处理
+            setTimeout(() => {
+              isHandling401 = false
+            }, 1000)
+          }
           break
         case 403:
           ElMessage.error('没有权限访问')
