@@ -147,6 +147,101 @@ cd frontend && setsid npx vite --host 0.0.0.0 --port 3000 </dev/null >/dev/null 
 
 ---
 
+## 问题5: 仪表盘统计数据与实际不符
+
+### 现象
+仪表盘页面显示的用户总数和操作日志数与数据库实际数据不一致。
+
+### 原因分析
+仪表盘页面的统计数据是写死的固定值，没有从后端 API 获取真实数据：
+
+```typescript
+onMounted(() => {
+  // 这里可以调用 API 获取统计数据
+  stats.value = {
+    userCount: 1,    // 写死的值
+    roleCount: 3,
+    permissionCount: 21,
+    logCount: 1,     // 写死的值
+  }
+})
+```
+
+### 解决方案
+
+**1. 后端新增统计接口**
+
+创建 `app/Http/Controllers/DashboardController.php`：
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\Role;
+use App\Models\Permission;
+use App\Models\OperationLog;
+
+class DashboardController extends Controller
+{
+    public function stats()
+    {
+        $stats = [
+            'userCount' => User::count(),
+            'roleCount' => Role::count(),
+            'permissionCount' => Permission::count(),
+            'logCount' => OperationLog::count(),
+        ];
+
+        return $this->success($stats);
+    }
+}
+```
+
+**2. 添加路由**
+
+在 `routes/api.php` 中添加：
+
+```php
+Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+```
+
+**3. 前端新增 API 模块**
+
+创建 `frontend/src/api/dashboard.ts`：
+
+```typescript
+import request from './request'
+
+export function getDashboardStats() {
+  return request.get('/dashboard/stats')
+}
+```
+
+**4. 修改仪表盘页面**
+
+修改 `frontend/src/views/dashboard/index.vue`，从 API 获取数据：
+
+```typescript
+import { getDashboardStats } from '@/api/dashboard'
+
+async function fetchStats() {
+  try {
+    const { data } = await getDashboardStats()
+    stats.value = data.data
+  } catch {
+    // 错误已在拦截器中处理
+  }
+}
+
+onMounted(() => {
+  fetchStats()
+})
+```
+
+---
+
 ## 快速启动命令
 
 ```bash
