@@ -206,7 +206,7 @@ async function fetchData() {
   loading.value = true
   try {
     const { data } = await getPermissionList({ ...searchForm, tree: true })
-    tableData.value = data as any
+    tableData.value = data.data
   } catch {
     // 错误已在拦截器中处理
   } finally {
@@ -218,7 +218,7 @@ async function fetchPermissionTree() {
   try {
     const { data } = await getPermissionList({ status: 1, tree: true })
     permissionTree.value = [
-      { id: 0, display_name: '顶级权限', children: data as any } as Permission,
+      { id: 0, display_name: '顶级权限', children: data.data } as Permission,
     ]
   } catch {
     // 错误已在拦截器中处理

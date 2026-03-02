@@ -217,8 +217,8 @@ async function fetchData() {
       page_size: pagination.pageSize,
       ...searchForm,
     })
-    tableData.value = (data as any).list
-    pagination.total = (data as any).total
+    tableData.value = data.data.list
+    pagination.total = data.data.total
   } catch {
     // 错误已在拦截器中处理
   } finally {
@@ -230,7 +230,7 @@ async function fetchData() {
 async function fetchRoleOptions() {
   try {
     const { data } = await getAllRoles()
-    roleOptions.value = data as any
+    roleOptions.value = data.data
   } catch {
     // 错误已在拦截器中处理
   }

@@ -78,6 +78,38 @@ cd frontend && setsid npx vite --host 0.0.0.0 --port 3000 &
 
 ---
 
+## 问题3: 点击菜单导航报错
+
+### 现象
+点击导航栏菜单时，浏览器控制台报错：
+```
+Vue warn]: Unhandled error during execution of component update
+```
+
+### 原因分析
+各页面组件（用户管理、角色管理、权限管理、操作日志）中 API 响应数据处理方式不一致，部分使用 `data as any` 而非正确的 `data.data` 结构。
+
+### 解决方案
+修复所有页面组件中的 API 响应处理：
+
+**修复前：**
+```typescript
+tableData.value = (data as any).list
+```
+
+**修复后：**
+```typescript
+tableData.value = data.data.list
+```
+
+涉及文件：
+- `views/system/user/index.vue`
+- `views/system/role/index.vue`
+- `views/system/permission/index.vue`
+- `views/system/log/index.vue`
+
+---
+
 ## 快速启动命令
 
 ```bash

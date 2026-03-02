@@ -230,8 +230,8 @@ async function fetchData() {
       page_size: pagination.pageSize,
       ...searchForm,
     })
-    tableData.value = (data as any).list
-    pagination.total = (data as any).total
+    tableData.value = data.data.list
+    pagination.total = data.data.total
   } catch {
     // 错误已在拦截器中处理
   } finally {
@@ -242,7 +242,7 @@ async function fetchData() {
 async function fetchModules() {
   try {
     const { data } = await getOperationModules()
-    modules.value = data as any
+    modules.value = data.data
   } catch {
     // 错误已在拦截器中处理
   }
@@ -251,7 +251,7 @@ async function fetchModules() {
 async function fetchActions() {
   try {
     const { data } = await getOperationActions()
-    actions.value = data as any
+    actions.value = data.data
   } catch {
     // 错误已在拦截器中处理
   }
@@ -276,7 +276,7 @@ function handleReset() {
 async function handleDetail(row: OperationLog) {
   try {
     const { data } = await getOperationLogDetail(row.id)
-    detailData.value = data as any
+    detailData.value = data.data
     detailDialogVisible.value = true
   } catch {
     // 错误已在拦截器中处理
@@ -309,7 +309,7 @@ async function handleExport() {
       end_time: searchForm.end_time,
     })
 
-    const exportData = data as any
+    const exportData = data.data
     // 创建 CSV 内容
     const headers = Object.keys(exportData[0] || {})
     const csvContent = [

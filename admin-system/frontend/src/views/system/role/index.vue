@@ -196,8 +196,8 @@ async function fetchData() {
       page_size: pagination.pageSize,
       ...searchForm,
     })
-    tableData.value = (data as any).list
-    pagination.total = (data as any).total
+    tableData.value = data.data.list
+    pagination.total = data.data.total
   } catch {
     // 错误已在拦截器中处理
   } finally {
@@ -208,7 +208,7 @@ async function fetchData() {
 async function fetchPermissionTree() {
   try {
     const { data } = await getAllPermissions()
-    permissionTree.value = data as any
+    permissionTree.value = data.data
   } catch {
     // 错误已在拦截器中处理
   }
@@ -271,7 +271,7 @@ async function handlePermission(row: Role) {
     const { data } = await getRolePermissions(row.id)
     // 设置选中的权限节点
     setTimeout(() => {
-      permissionTreeRef.value?.setCheckedKeys(data)
+      permissionTreeRef.value?.setCheckedKeys(data.data)
     }, 0)
   } catch {
     // 错误已在拦截器中处理
