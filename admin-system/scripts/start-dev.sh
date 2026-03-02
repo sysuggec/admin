@@ -12,11 +12,11 @@ sleep 1
 
 # 启动后端 (使用 setsid 创建新会话，避免进程被终止)
 echo ">>> 启动后端服务 (端口 8000)..."
-setsid php artisan serve --host=0.0.0.0 --port=8000 &
+setsid php artisan serve --host=0.0.0.0 --port=8000 </dev/null >/dev/null 2>&1 &
 
-# 启动前端
+# 启动前端 (需要重定向 stdin 到 /dev/null)
 echo ">>> 启动前端服务 (端口 3000)..."
-cd frontend && setsid npx vite --host 0.0.0.0 --port 3000 &
+cd frontend && setsid npx vite --host 0.0.0.0 --port 3000 </dev/null >/dev/null 2>&1 &
 
 sleep 3
 echo ""

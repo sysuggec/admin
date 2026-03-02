@@ -42,6 +42,52 @@ body,
   --el-dialog-border-radius: 8px;
 }
 
+/* 修复 el-select 下拉菜单文字颜色问题 */
+.el-select-dropdown__item {
+  color: #606266 !important;
+}
+
+.el-select-dropdown__item.selected {
+  color: var(--el-color-primary) !important;
+}
+
+.el-select-dropdown__item:hover {
+  background-color: #f5f7fa !important;
+}
+
+/* 修复 el-select 选中后输入框文字颜色 (Element Plus 2.x 新结构) */
+.el-select .el-input__inner,
+.el-select .el-input__wrapper input {
+  color: #606266 !important;
+}
+
+/* Element Plus 2.13+ 新结构 */
+.el-select__wrapper {
+  --el-select-input-color: #606266 !important;
+}
+
+.el-select__placeholder span,
+.el-select__selected-item span,
+.el-select__selection span {
+  color: #606266 !important;
+}
+
+/* 选中后显示的值 */
+.el-select__selected-item:not(.is-hidden) span {
+  color: #606266 !important;
+}
+
+/* 搜索表单中的下拉框默认宽度 */
+.search-form .el-select {
+  width: 180px;
+}
+
+/* 修复 el-select placeholder 颜色 */
+.el-select .el-input__inner::placeholder,
+.el-select .el-input__wrapper input::placeholder {
+  color: #a8abb2 !important;
+}
+
 /* 页面通用样式 */
 .page-container {
   padding: 20px;
