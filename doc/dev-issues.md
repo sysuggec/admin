@@ -110,6 +110,43 @@ tableData.value = data.data.list
 
 ---
 
+## 问题4: 下拉框选择后看不到文字
+
+### 现象
+搜索表单中的 `el-select` 下拉框，选择选项后输入框内看不到选中的文字。
+
+### 原因分析
+搜索表单中的下拉框没有设置固定宽度，Element Plus 默认宽度太窄，导致选中的文字被截断无法显示。
+
+通过浏览器开发者工具检查：
+- `span` 元素的 `color: #606266`（正常）
+- `font-size: 14px`（正常）
+- `opacity: 1`（正常）
+
+问题出在下拉框容器宽度不够，文字虽然存在但被截断。
+
+### 解决方案
+在全局样式文件 `frontend/src/styles/index.css` 中添加搜索表单下拉框的默认宽度：
+
+```css
+/* 搜索表单中的下拉框默认宽度 */
+.search-form .el-select {
+  width: 180px;
+}
+```
+
+同时优化了启动脚本，确保后台进程稳定运行：
+
+```bash
+# 启动后端 (使用 setsid 创建新会话，避免进程被终止)
+setsid php artisan serve --host=0.0.0.0 --port=8000 </dev/null >/dev/null 2>&1 &
+
+# 启动前端 (需要重定向 stdin 到 /dev/null)
+cd frontend && setsid npx vite --host 0.0.0.0 --port 3000 </dev/null >/dev/null 2>&1 &
+```
+
+---
+
 ## 快速启动命令
 
 ```bash
