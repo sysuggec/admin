@@ -82,6 +82,18 @@ body,
   width: 180px;
 }
 
+/* 搜索表单中的日期选择器默认宽度 */
+.search-form .el-date-editor {
+  width: 240px;
+}
+
+/* 表单对话框中的下拉框和日期选择器宽度 */
+.el-dialog .el-select,
+.el-dialog .el-date-editor,
+.el-dialog .el-tree-select {
+  width: 100%;
+}
+
 /* 修复 el-select placeholder 颜色 */
 .el-select .el-input__inner::placeholder,
 .el-select .el-input__wrapper input::placeholder {
