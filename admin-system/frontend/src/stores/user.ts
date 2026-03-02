@@ -20,10 +20,9 @@ export const useUserStore = defineStore('user', () => {
   // 登录
   async function login(username: string, password: string) {
     const { data } = await loginApi({ username, password })
-    const res = data as any
-    token.value = res.access_token
-    localStorage.setItem('token', res.access_token)
-    return res
+    token.value = data.data.access_token
+    localStorage.setItem('token', data.data.access_token)
+    return data.data
   }
 
   // 登出
@@ -42,8 +41,8 @@ export const useUserStore = defineStore('user', () => {
   // 获取用户信息
   async function fetchUserInfo() {
     const { data } = await getUserInfoApi()
-    userInfo.value = data as any
-    return data
+    userInfo.value = data.data
+    return data.data
   }
 
   // 检查是否有权限
