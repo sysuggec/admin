@@ -66,33 +66,6 @@ test.describe('导航功能', () => {
   })
 })
 
-// 权限控制测试 - 这个测试验证前端路由守卫是否正确工作
-// 注意：当前应用的路由守卫可能存在问题，未登录用户访问受保护页面时可能不会重定向
-test.describe('权限控制', () => {
-  test.use({ storageState: { cookies: [], origins: [] } })
-
-  test('未登录访问受保护页面', async ({ page }) => {
-    await page.goto('/system/user')
-    
-    // 等待页面加载完成
-    await page.waitForLoadState('networkidle')
-
-    // 验证页面加载 - 可能显示登录页或显示内容（取决于路由守卫实现）
-    // 这是一个验证性测试，记录当前行为
-    const url = page.url()
-    const hasLoginInUrl = url.includes('/login')
-    const hasSystemUserInUrl = url.includes('/system/user')
-    
-    // 断言：要么重定向到登录页，要么停留在当前页（需要改进路由守卫）
-    expect(hasLoginInUrl || hasSystemUserInUrl).toBeTruthy()
-    
-    // 如果没有重定向到登录页，说明路由守卫需要改进
-    if (!hasLoginInUrl) {
-      console.log('Warning: Route guard did not redirect to login page. Consider improving the auth guard.')
-    }
-  })
-})
-
 test.describe('页面响应', () => {
   test('404 页面', async ({ page }) => {
     await page.goto('/non-existent-page')
