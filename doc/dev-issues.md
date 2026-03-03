@@ -292,18 +292,121 @@ case 401:
 ## 快速启动命令
 
 ```bash
-# 启动服务
-./scripts/start-dev.sh
-
-# 或手动启动
+# 启动服务（合并部署，持久运行）
 cd /workspace/admin-system
-setsid php artisan serve --host=0.0.0.0 --port=8000 &
-cd frontend && setsid npx vite --host 0.0.0.0 --port 3000 &
-
-# 查看服务状态
-ps aux | grep -E "(php artisan|vite)" | grep -v grep
+nohup php artisan serve --host=0.0.0.0 --port=8000 > /tmp/laravel.log 2>&1 &
 
 # 停止服务
 pkill -f "php artisan serve"
-pkill -f vite
+
+# 查看服务状态
+ps aux | grep "php artisan serve" | grep -v grep
 ```
+
+---
+
+## 问题7: 动态菜单不显示
+
+### 现象
+API `/api/auth/me` 返回了完整的菜单数据（包含登录日志菜单），但前端导航栏没有显示对应的菜单入口。更换浏览器测试也无效，排除缓存问题。
+
+### 原因分析
+`frontend/src/layouts/MainLayout.vue` 中的菜单是硬编码的，没有使用 API 返回的动态菜单数据：
+
+**原代码：**
+```vue
+<el-sub-menu index="system">
+  <template #title>
+    <el-icon><Setting /></el-icon>
+    <span>系统管理</span>
+  </template>
+  <el-menu-item index="/system/user">
+    <el-icon><User /></el-icon>
+    <template #title>用户管理</template>
+  </el-menu-item>
+  <!-- 硬编码的菜单项，无法动态更新 -->
+</el-sub-menu>
+```
+
+虽然 Store 中已有 `menus` 计算属性，但布局组件没有使用它来渲染菜单。
+
+### 解决方案
+修改 `MainLayout.vue`，使用 `userStore.menus` 动态渲染菜单：
+
+```vue
+<template>
+  <!-- 动态菜单渲染 -->
+  <template v-for="menu in userStore.menus" :key="menu.id">
+    <!-- 有子菜单的情况 -->
+    <el-sub-menu v-if="menu.children && menu.children.length > 0" :index="String(menu.id)">
+      <template #title>
+        <el-icon><component :is="getIcon(menu.icon)" /></el-icon>
+        <span>{{ menu.display_name }}</span>
+      </template>
+      <el-menu-item
+        v-for="child in menu.children"
+        :key="child.id"
+        :index="child.path || ''"
+      >
+        <el-icon><component :is="getIcon(child.icon)" /></el-icon>
+        <template #title>{{ child.display_name }}</template>
+      </el-menu-item>
+    </el-sub-menu>
+    <!-- 没有子菜单的情况 -->
+    <el-menu-item v-else :index="menu.path || ''">
+      <el-icon><component :is="getIcon(menu.icon)" /></el-icon>
+      <template #title>{{ menu.display_name }}</template>
+    </el-menu-item>
+  </template>
+</template>
+
+<script setup lang="ts">
+// 图标映射表
+const iconMap: Record<string, Component> = {
+  Setting,
+  User,
+  UserFilled,
+  Lock,
+  Document,
+  Odometer,
+  Postcard,
+}
+
+// 根据图标名称获取图标组件
+function getIcon(iconName: string | null) {
+  if (!iconName) return Document
+  return iconMap[iconName] || Document
+}
+</script>
+```
+
+修改文件：`frontend/src/layouts/MainLayout.vue`
+
+### 添加新菜单步骤
+1. 在数据库添加权限记录 (type: `menu`)
+2. 将权限分配给角色
+3. 在 `router/index.ts` 添加路由
+4. 如使用新图标，在 `MainLayout.vue` 的 `iconMap` 中添加映射
+
+---
+
+## 问题8: 服务启动后自动关闭
+
+### 现象
+使用 `php artisan serve` 启动后端服务，约 2 分钟后服务自动关闭，无法访问。
+
+### 原因分析
+后台 Bash 任务有 2 分钟超时限制，超时后进程会被自动终止。普通的 `&` 后台运行方式仍然受 shell 会话控制。
+
+### 解决方案
+使用 `nohup` 命令使进程独立运行：
+
+```bash
+# 启动服务（持久运行）
+nohup php artisan serve --host=0.0.0.0 --port=8000 > /tmp/laravel.log 2>&1 &
+
+# 停止服务
+pkill -f "php artisan serve"
+```
+
+已更新文档 `CODEBUDDY.md` 和 `README.md` 中的启动命令。
