@@ -3,6 +3,10 @@
 /public/build
 /public/hot
 /public/storage
+/public/assets
+/public/.vite
+/public/index.html
+/public/vite.svg
 /storage/*.key
 /storage/pail
 /vendor

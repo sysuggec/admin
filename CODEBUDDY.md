@@ -163,6 +163,50 @@ All API responses follow this structure:
 }
 ```
 
+## Deployment
+
+### Production Build (Combined Deployment)
+
+The frontend and backend are deployed together. The frontend builds to Laravel's `public/` directory.
+
+```bash
+# From project root (/workspace/admin-system)
+
+# 1. Install backend dependencies
+composer install --optimize-autoloader --no-dev
+
+# 2. Install frontend dependencies
+cd frontend && npm install && cd ..
+
+# 3. Build frontend (outputs to public/)
+cd frontend && npm run build && cd ..
+
+# 4. Optimize Laravel
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+### Nginx Configuration
+
+Use the provided `nginx.conf.example` as a reference. Key points:
+
+- Static files (JS/CSS) are served directly by Nginx
+- API requests (`/api/*`) are forwarded to PHP-FPM
+- SPA fallback: all non-file requests return `index.php` (Vue Router handles routing)
+
+### Development Mode
+
+For development, you can still run frontend and backend separately:
+
+```bash
+# Terminal 1: Backend
+php artisan serve
+
+# Terminal 2: Frontend (with hot reload)
+cd frontend && npm run dev
+```
+
 ## Default Credentials
 
 After running `./scripts/init-database.sh`:

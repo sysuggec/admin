@@ -1,0 +1,55 @@
+# Nginx 配置示例 - Laravel + Vue SPA 合并部署
+#
+# 使用方法：
+# 1. 复制此文件到 /etc/nginx/sites-available/
+# 2. 创建软链接到 sites-enabled/
+# 3. 修改 server_name 为你的域名
+# 4. 重载 nginx: sudo nginx -s reload
+
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /var/www/admin-system/public;
+    index index.php index.html;
+
+    # 字符编码
+    charset utf-8;
+
+    # 日志文件
+    access_log /var/log/nginx/admin-system-access.log;
+    error_log /var/log/nginx/admin-system-error.log;
+
+    # 主要位置块 - 处理所有请求
+    location / {
+        # 尝试顺序：静态文件 -> 目录 -> SPA 入口
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # API 请求转发给 PHP-FPM
+    location /api {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # PHP 处理
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;  # 根据实际 PHP 版本调整
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_hide_header X-Powered-By;
+
+        # 增加超时时间（可选）
+        fastcgi_read_timeout 60s;
+    }
+
+    # 静态资源缓存（JS/CSS/图片）
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    # 禁止访问隐藏文件
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
