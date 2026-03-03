@@ -1,4 +1,4 @@
-<template>
+    <template>
   <div class="main-layout">
     <!-- 侧边栏 -->
     <div class="sidebar" :class="{ collapsed: isCollapsed }">
@@ -19,28 +19,29 @@
           <template #title>仪表盘</template>
         </el-menu-item>
 
-        <el-sub-menu index="system">
-          <template #title>
-            <el-icon><Setting /></el-icon>
-            <span>系统管理</span>
-          </template>
-          <el-menu-item index="/system/user">
-            <el-icon><User /></el-icon>
-            <template #title>用户管理</template>
+        <!-- 动态菜单渲染 -->
+        <template v-for="menu in userStore.menus" :key="menu.id">
+          <!-- 有子菜单的情况 -->
+          <el-sub-menu v-if="menu.children && menu.children.length > 0" :index="String(menu.id)">
+            <template #title>
+              <el-icon><component :is="getIcon(menu.icon)" /></el-icon>
+              <span>{{ menu.display_name }}</span>
+            </template>
+            <el-menu-item
+              v-for="child in menu.children"
+              :key="child.id"
+              :index="child.path || ''"
+            >
+              <el-icon><component :is="getIcon(child.icon)" /></el-icon>
+              <template #title>{{ child.display_name }}</template>
+            </el-menu-item>
+          </el-sub-menu>
+          <!-- 没有子菜单的情况 -->
+          <el-menu-item v-else :index="menu.path || ''">
+            <el-icon><component :is="getIcon(menu.icon)" /></el-icon>
+            <template #title>{{ menu.display_name }}</template>
           </el-menu-item>
-          <el-menu-item index="/system/role">
-            <el-icon><UserFilled /></el-icon>
-            <template #title>角色管理</template>
-          </el-menu-item>
-          <el-menu-item index="/system/permission">
-            <el-icon><Lock /></el-icon>
-            <template #title>权限管理</template>
-          </el-menu-item>
-          <el-menu-item index="/system/log">
-            <el-icon><Document /></el-icon>
-            <template #title>操作日志</template>
-          </el-menu-item>
-        </el-sub-menu>
+        </template>
       </el-menu>
     </div>
 
@@ -128,9 +129,27 @@
 import { ref, computed, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
-import { Setting, User, UserFilled, Lock, Document, Fold, Expand, ArrowDown, Odometer } from '@element-plus/icons-vue'
+import { Setting, User, UserFilled, Lock, Document, Fold, Expand, ArrowDown, Odometer, Postcard } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { changePassword } from '@/api/auth'
+import type { Component } from 'vue'
+
+// 图标映射表
+const iconMap: Record<string, Component> = {
+  Setting,
+  User,
+  UserFilled,
+  Lock,
+  Document,
+  Odometer,
+  Postcard,
+}
+
+// 根据图标名称获取图标组件
+function getIcon(iconName: string | null) {
+  if (!iconName) return Document
+  return iconMap[iconName] || Document
+}
 
 const router = useRouter()
 const route = useRoute()

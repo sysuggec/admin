@@ -72,7 +72,7 @@ touch database/database.sqlite
 php artisan migrate --seed
 ```
 
-### 3. 前端安装
+### 3. 前端安装与构建
 
 ```bash
 cd frontend
@@ -80,16 +80,26 @@ cd frontend
 # 安装依赖
 npm install
 
-# 复制环境配置
-cp .env.example .env
-
-# 启动开发服务器
-npm run dev
+# 构建前端（输出到 ../public/ 目录）
+npm run build
 ```
 
-### 4. 访问系统
+### 4. 启动服务
 
-- 前端地址: http://localhost:3000
+```bash
+# 返回项目根目录
+cd ..
+
+# 启动服务（持久运行）
+nohup php artisan serve --host=0.0.0.0 --port=8000 > /tmp/laravel.log 2>&1 &
+
+# 停止服务
+pkill -f "php artisan serve"
+```
+
+### 5. 访问系统
+
+- 系统地址: http://localhost:8000
 - API 地址: http://localhost:8000/api
 
 默认管理员账号：
@@ -101,8 +111,11 @@ npm run dev
 ### 后端
 
 ```bash
-# 启动开发服务器
-php artisan serve --host=0.0.0.0 --port=8000
+# 启动开发服务器（持久运行）
+nohup php artisan serve --host=0.0.0.0 --port=8000 > /tmp/laravel.log 2>&1 &
+
+# 停止服务
+pkill -f "php artisan serve"
 
 # 运行测试
 php artisan test
@@ -121,10 +134,9 @@ php artisan config:clear
 ### 前端
 
 ```bash
-# 开发服务器
-npm run dev
+cd frontend
 
-# 构建生产版本
+# 构建生产版本（输出到 ../public/）
 npm run build
 
 # 预览生产版本
@@ -145,13 +157,6 @@ npm run preview
 | JWT_TTL | Token 有效期(分钟) | 60 |
 | JWT_REFRESH_TTL | 刷新 Token 有效期(分钟) | 20160 |
 
-### 前端 .env 主要配置
-
-| 配置项 | 说明 | 默认值 |
-|--------|------|--------|
-| VITE_API_BASE_URL | API 代理地址 | http://localhost:8000 |
-| VITE_APP_TITLE | 应用标题 | 运营后台管理系统 |
-
 ## API 接口
 
 | 模块 | 路径前缀 | 说明 |
@@ -161,6 +166,7 @@ npm run preview
 | 角色 | /api/roles | 角色 CRUD、权限分配 |
 | 权限 | /api/permissions | 权限 CRUD |
 | 操作日志 | /api/operation-logs | 日志查询、导出 |
+| 登录日志 | /api/login-logs | 登录日志查询 |
 | 仪表盘 | /api/dashboard | 统计数据 |
 
 ## 项目结构
@@ -185,11 +191,17 @@ admin-system/
 │   ├── src/
 │   │   ├── api/             # API 模块
 │   │   ├── components/      # 公共组件
-│   │   ├── layouts/         # 布局组件
+│   │   ├── layouts/         # 布局组件（动态菜单渲染）
 │   │   ├── router/          # 路由配置
 │   │   ├── stores/          # Pinia 状态管理
 │   │   ├── styles/          # 全局样式
 │   │   └── views/           # 页面组件
+│   │       └── system/
+│   │           ├── user/    # 用户管理
+│   │           ├── role/    # 角色管理
+│   │           ├── permission/ # 权限管理
+│   │           ├── log/     # 操作日志
+│   │           └── login-log/ # 登录日志
 │   └── vite.config.ts       # Vite 配置
 ├── .env.example             # 后端环境配置模板
 └── README.md
@@ -204,6 +216,20 @@ admin-system/
 - `user:delete` - 删除用户
 
 角色 `super_admin` 拥有所有权限，无需单独配置。
+
+## 动态菜单系统
+
+导航菜单根据用户权限动态渲染：
+
+1. API `/api/auth/me` 返回用户的 `menus` 数组
+2. 前端 `MainLayout.vue` 遍历 `userStore.menus` 渲染菜单
+3. 菜单图标通过 `iconMap` 映射
+
+添加新菜单步骤：
+1. 在数据库添加权限记录 (type: `menu`)
+2. 将权限分配给角色
+3. 在 `router/index.ts` 添加路由
+4. 如使用新图标，在 `MainLayout.vue` 的 `iconMap` 中添加映射
 
 ## License
 

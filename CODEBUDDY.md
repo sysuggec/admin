@@ -34,8 +34,11 @@ php artisan key:generate
 php artisan jwt:secret
 php artisan migrate --seed
 
-# Run development server
-php artisan serve
+# Run development server (persistent)
+nohup php artisan serve --host=0.0.0.0 --port=8000 > /tmp/laravel.log 2>&1 &
+
+# Stop development server
+pkill -f "php artisan serve"
 
 # Run tests
 php artisan test
@@ -66,13 +69,7 @@ php artisan config:clear
 # Install dependencies
 npm install
 
-# Copy environment config
-cp .env.example .env
-
-# Run development server (port 3000, proxies /api to backend at :8000)
-npm run dev
-
-# Build for production
+# Build for production (outputs to ../public/)
 npm run build
 
 # Preview production build
@@ -124,9 +121,10 @@ frontend/src/
 │   ├── user.ts
 │   ├── role.ts
 │   ├── permission.ts
-│   └── operation-log.ts
+│   ├── operation-log.ts
+│   └── login-log.ts
 ├── stores/
-│   └── user.ts             # Pinia store for auth state
+│   └── user.ts             # Pinia store for auth state, menus, permissions
 ├── router/
 │   └── index.ts            # Vue Router with permission guards
 ├── views/
@@ -136,9 +134,11 @@ frontend/src/
 │   │   ├── user/
 │   │   ├── role/
 │   │   ├── permission/
-│   │   └── log/
+│   │   ├── log/            # Operation log
+│   │   └── login-log/      # Login log
 │   └── error/
 ├── layouts/
+│   └── MainLayout.vue      # Dynamic menu rendering from API
 ├── components/
 ├── styles/
 └── main.ts
@@ -169,6 +169,22 @@ All API responses follow this structure:
 
 The frontend and backend are deployed together. The frontend builds to Laravel's `public/` directory.
 
+**Quick Start:**
+```bash
+# From project root (/workspace/admin-system)
+
+# 1. Install dependencies
+composer install
+cd frontend && npm install && cd ..
+
+# 2. Build frontend (outputs to public/)
+cd frontend && npm run build && cd ..
+
+# 3. Start server
+nohup php artisan serve --host=0.0.0.0 --port=8000 > /tmp/laravel.log 2>&1 &
+```
+
+**Full Production Build:**
 ```bash
 # From project root (/workspace/admin-system)
 
@@ -195,17 +211,32 @@ Use the provided `nginx.conf.example` as a reference. Key points:
 - API requests (`/api/*`) are forwarded to PHP-FPM
 - SPA fallback: all non-file requests return `index.php` (Vue Router handles routing)
 
-### Development Mode
+## Dynamic Menu System
 
-For development, you can still run frontend and backend separately:
+The navigation menu is dynamically rendered based on user permissions:
 
-```bash
-# Terminal 1: Backend
-php artisan serve
+- **API**: `/api/auth/me` returns user's `menus` array with hierarchical structure
+- **Store**: `userStore.menus` computed property in `stores/user.ts`
+- **Rendering**: `MainLayout.vue` iterates over `userStore.menus` to render menu items
+- **Icons**: Mapped via `iconMap` in `MainLayout.vue` (Setting, User, UserFilled, Lock, Document, Odometer, Postcard)
 
-# Terminal 2: Frontend (with hot reload)
-cd frontend && npm run dev
+Menu data structure:
+```json
+{
+  "id": 1,
+  "name": "system",
+  "display_name": "系统管理",
+  "icon": "Setting",
+  "path": "/system",
+  "children": [...]
+}
 ```
+
+To add a new menu item:
+1. Add permission in database (type: `menu`)
+2. Assign to role
+3. Add route in `router/index.ts`
+4. Add icon to `iconMap` in `MainLayout.vue` if using new icon
 
 ## Default Credentials
 
