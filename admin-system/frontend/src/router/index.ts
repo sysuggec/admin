@@ -50,6 +50,12 @@ const routes: RouteRecordRaw[] = [
             component: () => import('@/views/system/log/index.vue'),
             meta: { title: '操作日志', permission: 'log' },
           },
+          {
+            path: 'login-log',
+            name: 'LoginLog',
+            component: () => import('@/views/system/login-log/index.vue'),
+            meta: { title: '登录日志', permission: 'login-log' },
+          },
         ],
       },
     ],

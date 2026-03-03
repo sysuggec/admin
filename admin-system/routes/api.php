@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LoginLogController;
 use App\Http\Controllers\OperationLogController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
@@ -81,5 +82,15 @@ Route::middleware(['auth:api'])->group(function () {
         Route::delete('/batch', [OperationLogController::class, 'batchDestroy'])->middleware('permission:log:delete');
         Route::post('/clean', [OperationLogController::class, 'clean'])->middleware('permission:log:delete');
         Route::get('/export', [OperationLogController::class, 'export'])->middleware('permission:log:export');
+    });
+
+    // 登录日志
+    Route::prefix('login-logs')->group(function () {
+        Route::get('/', [LoginLogController::class, 'index'])->middleware('permission:login-log:list');
+        Route::get('/{id}', [LoginLogController::class, 'show'])->middleware('permission:login-log:detail');
+        Route::delete('/{id}', [LoginLogController::class, 'destroy'])->middleware('permission:login-log:delete');
+        Route::delete('/batch', [LoginLogController::class, 'batchDestroy'])->middleware('permission:login-log:delete');
+        Route::post('/clean', [LoginLogController::class, 'clean'])->middleware('permission:login-log:delete');
+        Route::get('/export', [LoginLogController::class, 'export'])->middleware('permission:login-log:export');
     });
 });
